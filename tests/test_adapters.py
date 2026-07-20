@@ -15,6 +15,16 @@ def load(path: Path):
 
 
 class AdapterBuildTests(unittest.TestCase):
+    def test_readme_overlay_is_current(self) -> None:
+        completed = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "update_readme.py"), "--check"],
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+
     def test_generated_artifacts_are_current(self) -> None:
         completed = subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "build_adapters.py"), "--check"],
@@ -33,6 +43,9 @@ class AdapterBuildTests(unittest.TestCase):
         self.assertEqual(cursor["name"], claude["name"])
         self.assertEqual(cursor["version"], codex["version"])
         self.assertEqual(cursor["version"], claude["version"])
+        repository = "https://github.com/lencshu/pstack-cross-platform"
+        self.assertEqual(codex["repository"], repository)
+        self.assertEqual(claude["repository"], repository)
 
     def test_every_source_skill_is_packaged(self) -> None:
         source = {path.parent.name for path in (ROOT / "skills").glob("*/SKILL.md")}

@@ -19,10 +19,10 @@ codex plugin marketplace add .
 codex plugin add pstack@pstack-cross-platform
 ```
 
-从 GitHub 安装时，把 `<owner>/<repo>` 换成这个仓库发布后的地址：
+从 GitHub 安装：
 
 ```powershell
-codex plugin marketplace add <owner>/<repo>
+codex plugin marketplace add lencshu/pstack-cross-platform
 codex plugin add pstack@pstack-cross-platform
 ```
 
@@ -40,7 +40,7 @@ claude plugin install pstack@pstack-cross-platform
 从 GitHub 安装：
 
 ```powershell
-claude plugin marketplace add <owner>/<repo>
+claude plugin marketplace add lencshu/pstack-cross-platform
 claude plugin install pstack@pstack-cross-platform
 ```
 

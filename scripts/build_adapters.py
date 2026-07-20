@@ -232,14 +232,14 @@ def apply_overrides(output: Path, config: dict[str, Any]) -> None:
         destination.write_text(text, encoding="utf-8", newline="\n")
 
 
-def codex_manifest(upstream: dict[str, Any]) -> dict[str, Any]:
+def codex_manifest(upstream: dict[str, Any], distribution: dict[str, Any]) -> dict[str, Any]:
     return {
         "name": upstream["name"],
         "version": upstream["version"],
         "description": upstream["description"],
         "author": upstream["author"],
-        "homepage": upstream["homepage"],
-        "repository": upstream["repository"],
+        "homepage": distribution["homepage"],
+        "repository": distribution["repository"],
         "license": upstream["license"],
         "keywords": upstream["keywords"] + ["codex"],
         "skills": "./skills/",
@@ -253,7 +253,7 @@ def codex_manifest(upstream: dict[str, Any]) -> dict[str, Any]:
             "developerName": upstream["author"]["name"],
             "category": "Developer Tools",
             "capabilities": ["Skills", "Multi-agent", "Code review"],
-            "websiteURL": upstream["homepage"],
+            "websiteURL": distribution["homepage"],
             "defaultPrompt": [
                 "Use pstack to handle this task with rigorous verification.",
                 "Review this change with pstack and look for hidden risks."
@@ -262,15 +262,15 @@ def codex_manifest(upstream: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def claude_manifest(upstream: dict[str, Any]) -> dict[str, Any]:
+def claude_manifest(upstream: dict[str, Any], distribution: dict[str, Any]) -> dict[str, Any]:
     return {
         "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
         "name": upstream["name"],
         "version": upstream["version"],
         "description": upstream["description"],
         "author": upstream["author"],
-        "homepage": upstream["homepage"],
-        "repository": upstream["repository"],
+        "homepage": distribution["homepage"],
+        "repository": distribution["repository"],
         "license": upstream["license"],
         "keywords": upstream["keywords"] + ["claude-code"],
     }
@@ -346,13 +346,22 @@ def validate_generated(output: Path, config: dict[str, Any]) -> None:
         raise ValueError("\n".join(failures))
 
 
-def build_package(staging_root: Path, config: dict[str, Any], upstream: dict[str, Any]) -> Path:
+def build_package(
+    staging_root: Path,
+    config: dict[str, Any],
+    upstream: dict[str, Any],
+    distribution: dict[str, Any],
+) -> Path:
     output = staging_root / config["output"]
     for include in config["include"]:
         copy_and_transform(ROOT / include, output / include, config)
     apply_overrides(output, config)
 
-    manifest = codex_manifest(upstream) if config["platform"] == "codex" else claude_manifest(upstream)
+    manifest = (
+        codex_manifest(upstream, distribution)
+        if config["platform"] == "codex"
+        else claude_manifest(upstream, distribution)
+    )
     manifest_path = output / config["manifest_dir"] / "plugin.json"
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(dump_json(manifest), encoding="utf-8", newline="\n")
@@ -430,6 +439,7 @@ def main() -> int:
 
     selected = tuple(args.platform or PLATFORMS)
     upstream = source_manifest()
+    distribution = load_json(ADAPTERS / "distribution.json")
     with tempfile.TemporaryDirectory(prefix="pstack-adapters-") as temporary:
         staging = Path(temporary)
         built: dict[str, Path] = {}
@@ -437,7 +447,7 @@ def main() -> int:
         for platform in selected:
             config = load_json(ADAPTERS / f"{platform}.json")
             configs[platform] = config
-            built[platform] = build_package(staging, config, upstream)
+            built[platform] = build_package(staging, config, upstream, distribution)
 
         marketplaces = marketplace_files(upstream)
         if args.check:

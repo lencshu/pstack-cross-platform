@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -27,6 +28,8 @@ UPSTREAM_PATHS = (
     "README.md",
 )
 TEXT_SUFFIXES = {".md", ".json", ".yaml", ".yml", ".sh", ".tsv", ".txt"}
+README_START = "<!-- pstack-cross-platform:install:start -->"
+README_END = "<!-- pstack-cross-platform:install:end -->"
 
 
 def run(*args: str, cwd: Path | None = None) -> str:
@@ -54,6 +57,18 @@ def files(root: Path, relative: str) -> dict[str, str]:
             # Git's autocrlf may materialize the same upstream file differently on
             # Windows. Compare canonical LF bytes so check mode reports content drift.
             data = data.replace(b"\r\n", b"\n")
+        if key == "README.md":
+            text = data.decode("utf-8")
+            if README_START in text and README_END in text:
+                pattern = re.compile(
+                    re.escape(README_START) + r".*?" + re.escape(README_END), re.DOTALL
+                )
+            else:
+                pattern = re.compile(r"## install\n.*?(?=\n## get started)", re.DOTALL)
+            text, count = pattern.subn("## install\n<cross-platform-install-overlay>", text, count=1)
+            if count != 1:
+                raise ValueError(f"README install section not found in {path}")
+            data = text.encode("utf-8")
         result[key] = hashlib.sha256(data).hexdigest()
     return result
 
@@ -135,6 +150,9 @@ def main() -> int:
                 lock_path = ROOT / "adapters" / "upstream-lock.json"
                 lock_path.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
                 subprocess.run(
+                    [sys.executable, str(ROOT / "scripts" / "update_readme.py")], check=True
+                )
+                subprocess.run(
                     [sys.executable, str(ROOT / "scripts" / "build_adapters.py")], check=True
                 )
                 print(f"Cursor source is current at {commit}; rebuilt both adapters.")
@@ -150,6 +168,7 @@ def main() -> int:
             return 1
 
         mirror(upstream)
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "update_readme.py")], check=True)
         lock = {
             "repository": args.repo,
             "ref": args.ref,
