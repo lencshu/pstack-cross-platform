@@ -4,6 +4,42 @@
 
 ## 安装
 
+### 准备终端
+
+使用下面的 `codex` 或 `claude` 命令前，先按操作系统完成对应设置。
+
+#### macOS
+
+Codex Desktop 自带 CLI，路径为 `/Applications/Codex.app/Contents/Resources/codex`；若无法识别 `codex`，请直接使用此完整路径。Claude Desktop 不会安装 `claude` 命令，因此需要安装 Claude Code CLI 并将其目录加入 zsh：
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+#### Linux
+
+请使用独立 CLI。Claude 安装器会把命令写入 `~/.local/bin`：
+
+```bash
+npm install --global @openai/codex
+curl -fsSL https://claude.ai/install.sh | bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### Windows（PowerShell）
+
+安装两个独立 CLI 后，请重新打开 PowerShell，使更新后的 `PATH` 生效：
+
+```powershell
+npm install --global @openai/codex
+irm https://claude.ai/install.ps1 | iex
+```
+
+如果仍无法识别任一命令，请使用 `Get-Command codex` 或 `Get-Command claude` 确认安装状态；若未找到，重新运行对应安装命令。
+
 ### Cursor
 
 ```text
@@ -74,13 +110,37 @@ Cursor 官方说明见 [Plugins](https://cursor.com/docs/plugins)。
 
 Codex 桌面端从 `.agents/plugins/marketplace.json` 读取本仓库的 Marketplace。首次使用需要先注册仓库，之后可以在 App 内安装和管理插件。
 
-1. 在系统终端注册 Marketplace：
+1. 在系统终端注册 Marketplace。macOS 请使用桌面端随附的 Codex 命令：
+
+   ```bash
+   /Applications/Codex.app/Contents/Resources/codex plugin marketplace add lencshu/pstack-cross-platform
+   ```
+
+   Linux 在完成上面的终端设置后，改用 `codex`：
+
+   ```bash
+   codex plugin marketplace add lencshu/pstack-cross-platform
+   ```
+
+   Windows PowerShell 使用：
 
    ```powershell
    codex plugin marketplace add lencshu/pstack-cross-platform
    ```
 
    开发本地改动时，把 GitHub 地址换成仓库根目录：
+
+   ```bash
+   /Applications/Codex.app/Contents/Resources/codex plugin marketplace add .
+   ```
+
+   Linux 使用：
+
+   ```bash
+   codex plugin marketplace add .
+   ```
+
+   Windows PowerShell 使用：
 
    ```powershell
    codex plugin marketplace add .
@@ -93,13 +153,17 @@ Codex 桌面端从 `.agents/plugins/marketplace.json` 读取本仓库的 Marketp
 
 命令行完整安装与排错：
 
-```powershell
-codex plugin add pstack@pstack-cross-platform
-codex plugin marketplace list
-codex plugin list
+```bash
+/Applications/Codex.app/Contents/Resources/codex plugin add pstack@pstack-cross-platform
+/Applications/Codex.app/Contents/Resources/codex plugin marketplace list
+/Applications/Codex.app/Contents/Resources/codex plugin list
 ```
 
-更新 GitHub Marketplace 后运行 `codex plugin marketplace upgrade pstack-cross-platform`，重新安装插件，并新建任务。开发期若修改了生成包，按 Codex 的缓存刷新流程更新版本后重新安装，不能依赖旧任务热加载新的技能文件。
+Linux 请将完整 macOS 路径替换为 `codex`。Windows 请在 PowerShell 中运行相同的 `codex plugin` 子命令。
+
+更新 GitHub Marketplace 后运行 `/Applications/Codex.app/Contents/Resources/codex plugin marketplace upgrade pstack-cross-platform`，重新安装插件，并新建任务。开发期若修改了生成包，按 Codex 的缓存刷新流程更新版本后重新安装，不能依赖旧任务热加载新的技能文件。
+
+如果 macOS 终端提示无法识别 `codex`，请使用上面的完整命令 `/Applications/Codex.app/Contents/Resources/codex`；它是 Codex 桌面端随附的 CLI。若该路径不存在，请更新或重新安装 Codex 桌面端。如需使用短命令 `codex`，可另行安装独立 CLI（例如 `npm install --global @openai/codex`），并确保其安装目录已加入 `PATH`。
 
 Codex 桌面端会把这个包显示为技能插件。当前包没有 `.app.json` 或 MCP 服务，因此不会出现自定义界面或外部账号授权流程。官方流程见 [Plugins](https://learn.chatgpt.com/docs/plugins) 和 [Build plugins](https://learn.chatgpt.com/docs/build-plugins#build-your-own-curated-plugin-list)。
 
@@ -107,13 +171,26 @@ Codex 桌面端会把这个包显示为技能插件。当前包没有 `.app.json
 
 Claude Desktop 与 Claude Code CLI 共用插件配置。先注册 Marketplace，再在 Code 标签页的插件管理器中安装：
 
-1. 在系统终端注册 Marketplace：
+1. Claude Desktop 不会安装终端中的 `claude` 命令。先安装 Claude Code CLI，再注册 Marketplace。macOS 和 Linux 的安装器使用 `~/.local/bin/claude`：
+
+   ```bash
+   curl -fsSL https://claude.ai/install.sh | bash
+   ~/.local/bin/claude plugin marketplace add lencshu/pstack-cross-platform
+   ```
+
+   Windows PowerShell 使用：
 
    ```powershell
    claude plugin marketplace add lencshu/pstack-cross-platform
    ```
 
    本地开发时可改用：
+
+   ```bash
+   ~/.local/bin/claude plugin marketplace add .
+   ```
+
+   Windows PowerShell 使用：
 
    ```powershell
    claude plugin marketplace add .
@@ -128,10 +205,26 @@ Claude Desktop 与 Claude Code CLI 共用插件配置。先注册 Marketplace，
 
 也可以完全使用命令行安装：
 
+```bash
+~/.local/bin/claude plugin install pstack@pstack-cross-platform
+~/.local/bin/claude plugin marketplace list
+```
+
+Windows PowerShell 使用：
+
 ```powershell
 claude plugin install pstack@pstack-cross-platform
 claude plugin marketplace list
 ```
+
+如果无法识别 `claude`，请先按上文使用 `~/.local/bin/claude`。若该文件不存在，重新运行安装命令。要让之后的 zsh 会话也能直接使用 `claude`，运行：
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Linux 请将同一行加入 `~/.bashrc`，然后运行 `source ~/.bashrc`。Windows 请在安装后重新打开 PowerShell；若仍无法使用 `claude`，重新运行 `irm https://claude.ai/install.ps1 | iex`。
 
 团队仓库或 Claude Desktop 云会话不能依赖某台电脑上的本地安装。把下面的配置加入仓库的 `.claude/settings.json`，让受信任的仓库在会话启动时安装并启用插件：
 

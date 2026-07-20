@@ -4,6 +4,42 @@ This repository treats the Cursor edition of pstack as its single upstream sourc
 
 ## Installation
 
+### Prepare the terminal
+
+Run the setup for your operating system before using the `codex` or `claude` commands below.
+
+#### macOS
+
+Codex Desktop includes a CLI at `/Applications/Codex.app/Contents/Resources/codex`; use that full path if `codex` is unavailable. Claude Desktop does not install the `claude` command, so install Claude Code CLI and add its location to zsh:
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+#### Linux
+
+Use the standalone CLIs. Claude's installer writes its binary to `~/.local/bin`:
+
+```bash
+npm install --global @openai/codex
+curl -fsSL https://claude.ai/install.sh | bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### Windows (PowerShell)
+
+Install both standalone CLIs, then open a new PowerShell window so the updated `PATH` is loaded:
+
+```powershell
+npm install --global @openai/codex
+irm https://claude.ai/install.ps1 | iex
+```
+
+If either command is still not recognized, confirm the installation with `Get-Command codex` or `Get-Command claude`; rerun the relevant installer if it is absent.
+
 ### Cursor
 
 ```text
@@ -74,13 +110,37 @@ See the official Cursor [Plugins](https://cursor.com/docs/plugins) documentation
 
 Codex desktop reads this repository's marketplace from `.agents/plugins/marketplace.json`. Register the repository once, then install and manage the plugin in the app.
 
-1. Register the marketplace in a system terminal:
+1. Register the marketplace in a system terminal. On macOS, use the Codex command bundled with the desktop app:
+
+   ```bash
+   /Applications/Codex.app/Contents/Resources/codex plugin marketplace add lencshu/pstack-cross-platform
+   ```
+
+   On Linux, after completing the terminal setup above, use `codex` instead:
+
+   ```bash
+   codex plugin marketplace add lencshu/pstack-cross-platform
+   ```
+
+   On Windows PowerShell:
 
    ```powershell
    codex plugin marketplace add lencshu/pstack-cross-platform
    ```
 
    When developing local changes, use the repository root instead:
+
+   ```bash
+   /Applications/Codex.app/Contents/Resources/codex plugin marketplace add .
+   ```
+
+   On Linux:
+
+   ```bash
+   codex plugin marketplace add .
+   ```
+
+   On Windows PowerShell:
 
    ```powershell
    codex plugin marketplace add .
@@ -93,13 +153,17 @@ Codex desktop reads this repository's marketplace from `.agents/plugins/marketpl
 
 For a full command-line installation and troubleshooting flow:
 
-```powershell
-codex plugin add pstack@pstack-cross-platform
-codex plugin marketplace list
-codex plugin list
+```bash
+/Applications/Codex.app/Contents/Resources/codex plugin add pstack@pstack-cross-platform
+/Applications/Codex.app/Contents/Resources/codex plugin marketplace list
+/Applications/Codex.app/Contents/Resources/codex plugin list
 ```
 
-After updating the GitHub marketplace, run `codex plugin marketplace upgrade pstack-cross-platform`, reinstall the plugin, and start a new task. When a generated package changes during development, refresh the cached package version and reinstall it. Do not expect an existing task to load a changed skill file.
+On Linux, replace the full macOS path with `codex`. On Windows, run the same `codex plugin` subcommands from PowerShell.
+
+After updating the GitHub marketplace, run `/Applications/Codex.app/Contents/Resources/codex plugin marketplace upgrade pstack-cross-platform`, reinstall the plugin, and start a new task. When a generated package changes during development, refresh the cached package version and reinstall it. Do not expect an existing task to load a changed skill file.
+
+If `codex` is not recognized in macOS Terminal, use the full `/Applications/Codex.app/Contents/Resources/codex` command above. It is the CLI bundled with Codex desktop. If that path does not exist, update or reinstall Codex desktop. To use the shorter `codex` command instead, install the standalone CLI (for example, `npm install --global @openai/codex`) and ensure its installation directory is on your `PATH`.
 
 Codex desktop shows this package as a skills plugin. It has no `.app.json` or MCP server, so it does not add a custom interface or external account authorization. See the official [Plugins](https://learn.chatgpt.com/docs/plugins) and [Build plugins](https://learn.chatgpt.com/docs/build-plugins#build-your-own-curated-plugin-list) guides.
 
@@ -107,13 +171,26 @@ Codex desktop shows this package as a skills plugin. It has no `.app.json` or MC
 
 Claude Desktop and the Claude Code CLI share plugin configuration. Register the marketplace, then install it from the Code tab plugin manager.
 
-1. Register the marketplace in a system terminal:
+1. Claude Desktop does not install the `claude` Terminal command. Install Claude Code CLI first, then register the marketplace. On macOS and Linux, the installer uses `~/.local/bin/claude`:
+
+   ```bash
+   curl -fsSL https://claude.ai/install.sh | bash
+   ~/.local/bin/claude plugin marketplace add lencshu/pstack-cross-platform
+   ```
+
+   On Windows PowerShell, use:
 
    ```powershell
    claude plugin marketplace add lencshu/pstack-cross-platform
    ```
 
    For local development, use:
+
+   ```bash
+   ~/.local/bin/claude plugin marketplace add .
+   ```
+
+   On Windows PowerShell:
 
    ```powershell
    claude plugin marketplace add .
@@ -128,10 +205,26 @@ Claude Desktop and the Claude Code CLI share plugin configuration. Register the 
 
 You can also install it entirely from the command line:
 
+```bash
+~/.local/bin/claude plugin install pstack@pstack-cross-platform
+~/.local/bin/claude plugin marketplace list
+```
+
+On Windows PowerShell:
+
 ```powershell
 claude plugin install pstack@pstack-cross-platform
 claude plugin marketplace list
 ```
+
+If `claude` is not recognized, first use `~/.local/bin/claude` as shown above. If that file is missing, rerun the installer. To make `claude` work in future zsh sessions, run:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+On Linux, add the same line to `~/.bashrc` and run `source ~/.bashrc`. On Windows, reopen PowerShell after installation; if `claude` remains unavailable, rerun `irm https://claude.ai/install.ps1 | iex`.
 
 A team repository or Claude Desktop cloud session cannot rely on a local installation from one computer. Add this configuration to the repository's `.claude/settings.json` to install and enable the plugin when a trusted repository session starts:
 
