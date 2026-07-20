@@ -1,0 +1,20 @@
+{
+  "name": "pstack-cross-platform",
+  "interface": {
+    "displayName": "pstack cross-platform"
+  },
+  "plugins": [
+    {
+      "name": "pstack",
+      "source": {
+        "source": "local",
+        "path": "./plugins/pstack"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

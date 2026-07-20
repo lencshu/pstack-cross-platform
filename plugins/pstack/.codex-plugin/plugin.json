@@ -1,0 +1,39 @@
+{
+  "name": "pstack",
+  "version": "0.11.3",
+  "description": "if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence.",
+  "author": {
+    "name": "Lauren Tan"
+  },
+  "homepage": "https://github.com/cursor/plugins/tree/main/pstack",
+  "repository": "https://github.com/cursor/plugins",
+  "license": "MIT",
+  "keywords": [
+    "pstack",
+    "poteto-mode",
+    "workflow",
+    "principles",
+    "agent-style",
+    "subagents",
+    "unslop",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "pstack",
+    "shortDescription": "Rigorous, verifiable engineering workflows for Codex",
+    "longDescription": "A generated Codex edition of pstack with platform-aware subagent, model, skill-path, and monitoring instructions.",
+    "developerName": "Lauren Tan",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Skills",
+      "Multi-agent",
+      "Code review"
+    ],
+    "websiteURL": "https://github.com/cursor/plugins/tree/main/pstack",
+    "defaultPrompt": [
+      "Use pstack to handle this task with rigorous verification.",
+      "Review this change with pstack and look for hidden risks."
+    ]
+  }
+}

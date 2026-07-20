@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "pstack-cross-platform",
+  "version": "0.11.3",
+  "description": "Cross-platform pstack packages generated from the Cursor source",
+  "owner": {
+    "name": "Lauren Tan"
+  },
+  "plugins": [
+    {
+      "name": "pstack",
+      "source": "./platforms/claude/pstack",
+      "description": "if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence.",
+      "version": "0.11.3",
+      "author": {
+        "name": "Lauren Tan"
+      },
+      "category": "development"
+    }
+  ]
+}

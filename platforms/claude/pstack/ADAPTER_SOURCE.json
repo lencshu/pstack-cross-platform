@@ -1,0 +1,10 @@
+{
+  "generated": true,
+  "generator": "scripts/build_adapters.py",
+  "platform": "claude",
+  "source": "Cursor pstack tree at repository root",
+  "sourceVersion": "0.11.3",
+  "sourceDigest": "e91943027f513fcaeada1e2967e13c6531065a61f941f753a91ecb347c2c2def",
+  "upstreamRepository": "https://github.com/cursor/plugins.git",
+  "upstreamCommit": "3fe2823ce17c1656c222d4b7c59d3f82fbf20143"
+}
