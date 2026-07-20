@@ -1,8 +1,8 @@
-# pstack 跨平台适配
+# pstack cross-platform adapter
 
-这个仓库以 Cursor 版 pstack 为唯一上游源，同时产出可直接安装的 Codex 和 Claude Code 插件。适配不是三份手工副本：根目录的 `skills/`、`agents/`、`automations/`、`.cursor-plugin/` 保持 Cursor 上游结构，其他平台包由脚本生成。
+This repository treats the Cursor edition of pstack as its single upstream source and produces installable Codex and Claude Code plugins. The adapters are not three hand-maintained copies. The root `skills/`, `agents/`, `automations/`, and `.cursor-plugin/` directories retain the Cursor upstream layout. Scripts generate the other platform packages.
 
-## 安装
+## Installation
 
 ### Cursor
 
@@ -12,92 +12,212 @@
 
 ### Codex
 
-从本地仓库安装：
+Install from a local checkout:
 
 ```powershell
 codex plugin marketplace add .
 codex plugin add pstack@pstack-cross-platform
 ```
 
-从 GitHub 安装：
+Install from GitHub:
 
 ```powershell
 codex plugin marketplace add lencshu/pstack-cross-platform
 codex plugin add pstack@pstack-cross-platform
 ```
 
-新任务中先运行 `$pstack:setup-pstack`，再用 `$pstack:poteto-mode`。
+In a new task, run `$pstack:setup-pstack` first, then use `$pstack:poteto-mode`.
 
 ### Claude Code
 
-从本地仓库安装：
+Install from a local checkout:
 
 ```powershell
 claude plugin marketplace add .
 claude plugin install pstack@pstack-cross-platform
 ```
 
-从 GitHub 安装：
+Install from GitHub:
 
 ```powershell
 claude plugin marketplace add lencshu/pstack-cross-platform
 claude plugin install pstack@pstack-cross-platform
 ```
 
-新会话中先运行 `/pstack:setup-pstack`，再用 `/pstack:poteto-mode`。
+In a new session, run `/pstack:setup-pstack` first, then use `/pstack:poteto-mode`.
 
-## 实现原理
+## Desktop app integration
 
-pstack 没有常驻进程或传统运行时代码。它的执行主体是 `SKILL.md`：客户端先读取 frontmatter 中的名称和描述，需要时再加载正文，并由模型依照正文调用文件、终端、MCP 和子代理工具。因此“能识别清单”只解决安装问题；要真正兼容，还必须翻译正文中的平台语义。
+The adapter packages do not create a separate sidebar, Webview, or settings page. On desktop, pstack is an installable plugin with skills and subagents. Invoke its skills from the chat input after installation. The UI paths below follow the client documentation available on 2026-07-20.
 
-适配层处理五类差异：
+### Cursor desktop
 
-1. 插件清单。Cursor 使用 `.cursor-plugin/plugin.json`，Codex 使用 `.codex-plugin/plugin.json`，Claude Code 使用 `.claude-plugin/plugin.json`。
-2. 市场清单。Codex 从 `.agents/plugins/marketplace.json` 发现 `plugins/pstack`；Claude Code 从 `.claude-plugin/marketplace.json` 发现 `platforms/claude/pstack`。
-3. 技能调用名。Codex 生成 `$pstack:<skill>`，Claude Code 生成 `/pstack:<skill>`。
-4. 子代理协议。Cursor 的 `Task`、`subagent_type`、`readonly` 和模型 slug 被翻译成 Codex 的子代理/推理强度语义，或 Claude Code 的 `Agent`、模型 alias 和显式只读提示。
-5. 客户端能力。Cursor 专有的 `/loop`、`babysit`、`cursor-team-kit` 控制技能、规则目录和 transcript 路径会被替换成目标平台当前可用的等待、GitHub、浏览器、终端、配置与任务历史能力。
+Cursor uses the upstream source at the repository root directly. It does not use output from `adapters/`. For normal use, install the official pstack plugin from Cursor Marketplace.
 
-生成器会在每个目标 `SKILL.md` 中注入一小段平台契约。模型选择由 `$pstack:setup-pstack` 或 `/pstack:setup-pstack` 写入 `~/.pstack/<platform>-models.md`，不会污染 Codex 或 Claude Code 的全局规则。
+1. Open Cursor and run `/add-plugin pstack` in the Agent input. You can also search for `pstack` in [Cursor Marketplace](https://cursor.com/marketplace).
+2. Start a new Agent conversation after installation.
+3. Run `/setup-pstack` once and choose models for the different roles.
+4. For a non-trivial task, run `/poteto-mode <task description>`. Invoke other skills as `/<skill>`.
+5. Disable, update, or uninstall the plugin from Customize or the plugin manager in Cursor.
 
-## 目录边界
+To develop this repository, point Cursor's local plugin directory at the repository root:
 
 ```text
-skills/                              Cursor 上游技能，唯一业务源
-agents/                              Cursor 上游 agent
-automations/                         Cursor 专属 Benny 自动化
-adapters/codex.json                  Codex 声明式替换和约束
-adapters/claude.json                 Claude Code 声明式替换和约束
-adapters/*/overrides/                无法安全通用替换的少量文件
-scripts/build_adapters.py            构建两个目标包和市场清单
-scripts/sync_cursor_upstream.py      检查或同步 Cursor 上游子目录
-plugins/pstack/                      生成的 Codex 插件，不手改
-platforms/claude/pstack/             生成的 Claude Code 插件，不手改
+~/.cursor/plugins/local/pstack/
 ```
 
-Claude Code 可以直接打包 `agents/poteto-agent.md`。当前 Codex 插件清单不分发自定义 agent 文件，因此 Codex 版把它降解为“启动 worker，并在任务消息中要求先读取 poteto-mode”的适配协议。核心工作流仍然保留。
+`.cursor-plugin/plugin.json` must be at the plugin root. Create a directory link to this repository instead of copying its source. After changing it, run `Developer: Reload Window` or restart Cursor completely. Local verification then always reads the Cursor upstream directory. The generated Codex and Claude Code packages do not affect Cursor.
 
-Benny 依赖 Cursor Automations 和 Cursor Slack 动作，目前只在 Cursor 源中保留，不会伪装成已兼容组件。要迁移它，需要分别映射到 Codex Automations 与 Claude Code monitors/agent teams，这是独立功能项目。
+See the official Cursor [Plugins](https://cursor.com/docs/plugins) documentation.
 
-## 同步 Cursor 上游
+### Codex desktop
 
-默认命令只比较，不写文件：
+Codex desktop reads this repository's marketplace from `.agents/plugins/marketplace.json`. Register the repository once, then install and manage the plugin in the app.
+
+1. Register the marketplace in a system terminal:
+
+   ```powershell
+   codex plugin marketplace add lencshu/pstack-cross-platform
+   ```
+
+   When developing local changes, use the repository root instead:
+
+   ```powershell
+   codex plugin marketplace add .
+   ```
+
+2. Quit and reopen the ChatGPT or Codex desktop app. Closing its window alone may not refresh the marketplace.
+3. Select `Codex` in the desktop app and open `Plugins`.
+4. Select the `pstack cross-platform` marketplace source, open `pstack`, and select the plus button to install it. If you already ran `codex plugin add pstack@pstack-cross-platform`, confirm that it appears under `Installed` and is enabled.
+5. Start a new task. Run `$pstack:setup-pstack` once, then use `$pstack:poteto-mode` or another `$pstack:<skill>` skill.
+
+For a full command-line installation and troubleshooting flow:
+
+```powershell
+codex plugin add pstack@pstack-cross-platform
+codex plugin marketplace list
+codex plugin list
+```
+
+After updating the GitHub marketplace, run `codex plugin marketplace upgrade pstack-cross-platform`, reinstall the plugin, and start a new task. When a generated package changes during development, refresh the cached package version and reinstall it. Do not expect an existing task to load a changed skill file.
+
+Codex desktop shows this package as a skills plugin. It has no `.app.json` or MCP server, so it does not add a custom interface or external account authorization. See the official [Plugins](https://learn.chatgpt.com/docs/plugins) and [Build plugins](https://learn.chatgpt.com/docs/build-plugins#build-your-own-curated-plugin-list) guides.
+
+### Claude Desktop Code tab
+
+Claude Desktop and the Claude Code CLI share plugin configuration. Register the marketplace, then install it from the Code tab plugin manager.
+
+1. Register the marketplace in a system terminal:
+
+   ```powershell
+   claude plugin marketplace add lencshu/pstack-cross-platform
+   ```
+
+   For local development, use:
+
+   ```powershell
+   claude plugin marketplace add .
+   ```
+
+2. Open Claude Desktop, select the `Code` tab, and create a `Local` session. SSH sessions also support plugins.
+3. Select the `+` button beside the input, then choose `Plugins` and `Add plugin`.
+4. Select `pstack` in the `pstack-cross-platform` marketplace. Choose User scope for personal use, Project scope to write the enabled configuration to the repository, or Local scope for personal use in only the current repository.
+5. Run `/reload-plugins` after installation, or start a new Code session.
+6. Run `/pstack:setup-pstack` once, then use `/pstack:poteto-mode <task description>`. Select `+` and `Slash commands` to browse every pstack skill.
+7. Use `+`, `Plugins`, and `Manage plugins` to enable, disable, or uninstall the plugin.
+
+You can also install it entirely from the command line:
+
+```powershell
+claude plugin install pstack@pstack-cross-platform
+claude plugin marketplace list
+```
+
+A team repository or Claude Desktop cloud session cannot rely on a local installation from one computer. Add this configuration to the repository's `.claude/settings.json` to install and enable the plugin when a trusted repository session starts:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "pstack-cross-platform": {
+      "source": {
+        "source": "github",
+        "repo": "lencshu/pstack-cross-platform"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "pstack@pstack-cross-platform": true
+  }
+}
+```
+
+Claude Desktop currently offers the plugin browser only in Local and SSH sessions. A locally installed plugin does not automatically appear in Cloud sessions. Cloud sessions need the repository configuration above. WSL sessions do not support plugins. Desktop also does not support Agent Teams. pstack uses ordinary plugin skills and subagents, so it does not require Agent Teams.
+
+See the official [Claude Desktop](https://code.claude.com/docs/en/desktop), [plugin discovery and installation](https://code.claude.com/docs/en/discover-plugins), and [marketplace configuration](https://code.claude.com/docs/en/plugin-marketplaces) documentation.
+
+### Unified post-installation checks
+
+All three desktop clients should meet these conditions:
+
+1. The plugin manager shows `pstack` as installed and enabled.
+2. A new task or session can find the platform-specific `setup-pstack` and `poteto-mode` skills.
+3. Initial setup creates `~/.pstack/<platform>-models.md`.
+4. A mode skill can read project files, use the terminal, and launch subagents within the configured permissions.
+
+If the first check fails, confirm that the marketplace is registered. If the second fails, restart the app and start a new task. For the third, check write access to the user directory. For the fourth, check the current project's terminal, file, and subagent permissions.
+
+## How the adapter works
+
+pstack has no resident process or conventional runtime code. `SKILL.md` files drive it. The client reads the name and description in the frontmatter, loads the body when needed, and the model follows that body to use file, terminal, MCP, and subagent tools. A discoverable manifest solves installation only. Full compatibility also requires translating the platform-specific meaning in the skill body.
+
+The adapter layer handles five differences:
+
+1. Plugin manifests. Cursor uses `.cursor-plugin/plugin.json`, Codex uses `.codex-plugin/plugin.json`, and Claude Code uses `.claude-plugin/plugin.json`.
+2. Marketplace manifests. Codex finds `plugins/pstack` through `.agents/plugins/marketplace.json`. Claude Code finds `platforms/claude/pstack` through `.claude-plugin/marketplace.json`.
+3. Skill invocation names. Codex generates `$pstack:<skill>`. Claude Code generates `/pstack:<skill>`.
+4. Subagent protocols. The adapter translates Cursor's `Task`, `subagent_type`, `readonly`, and model slugs to Codex subagent and reasoning-effort semantics, or to Claude Code's `Agent`, model aliases, and explicit read-only prompts.
+5. Client capabilities. Cursor-only `/loop`, `babysit`, `cursor-team-kit` control skills, rules directories, and transcript paths map to the target platform's available waiting, GitHub, browser, terminal, configuration, and task-history capabilities.
+
+The generator injects a small platform contract into each target `SKILL.md`. `$pstack:setup-pstack` or `/pstack:setup-pstack` writes model selection to `~/.pstack/<platform>-models.md`. It does not modify the global rules of Codex or Claude Code.
+
+## Directory boundaries
+
+```text
+skills/                              Cursor upstream skills and the sole source of behavior
+agents/                              Cursor upstream agents
+automations/                         Cursor-only Benny automation
+adapters/codex.json                  Codex declarative substitutions and constraints
+adapters/claude.json                 Claude Code declarative substitutions and constraints
+adapters/*/overrides/                Files that cannot use a safe general substitution
+scripts/build_adapters.py            Builds target packages and marketplace manifests
+scripts/sync_cursor_upstream.py      Checks or synchronizes the Cursor upstream subdirectories
+plugins/pstack/                      Generated Codex plugin. Do not edit by hand
+platforms/claude/pstack/             Generated Claude Code plugin. Do not edit by hand
+```
+
+Claude Code can package `agents/poteto-agent.md` directly. The current Codex plugin manifest cannot distribute custom agent files. The Codex adapter therefore reduces it to a protocol that starts a worker and tells it to read Poteto Mode first. The core workflow remains intact.
+
+Benny depends on Cursor Automations and Cursor Slack actions. It remains in the Cursor source and is not presented as a compatible component. Migrating it requires separate mappings to Codex Automations and Claude Code monitors or agent teams. That is a separate feature project.
+
+## Synchronizing Cursor upstream
+
+The default command compares files without writing them:
 
 ```powershell
 python scripts/sync_cursor_upstream.py
 ```
 
-确认差异后再同步：
+Synchronize only after reviewing the differences:
 
 ```powershell
 python scripts/sync_cursor_upstream.py --apply
 ```
 
-`--apply` 只镜像 `.cursor-plugin/`、`agents/`、`automations/`、`skills/`、`LICENSE` 和 `README.md`，不会覆盖 `adapters/`、`scripts/`、测试或生成市场。完成后会自动重建两个目标包，并记录上游 commit。
+`--apply` mirrors only `.cursor-plugin/`, `agents/`, `automations/`, `skills/`, `LICENSE`, and `README.md`. It does not overwrite `adapters/`, `scripts/`, tests, or generated marketplaces. It rebuilds the two target packages and records the upstream commit.
 
-上游新增一种稳定的平台耦合表达时，优先把规则加到 `adapters/<platform>.json`。只有单个文件的语义无法可靠转换时，才放进 `overrides/`。这能把后续同步冲突保持在适配层，而不是扩散到整套技能。
+When upstream introduces a stable platform-coupled expression, add the rule to `adapters/<platform>.json` first. Put an override in `overrides/` only when a single file cannot be translated reliably. This keeps later sync conflicts in the adapter layer instead of spreading them through the skills.
 
-## 构建与验证
+## Build and verification
 
 ```powershell
 python scripts/build_adapters.py
@@ -107,4 +227,4 @@ claude plugin validate platforms/claude/pstack --strict
 claude plugin validate .claude-plugin/marketplace.json --strict
 ```
 
-Codex 包使用 Codex `plugin-creator` 提供的校验器验证。CI 环境可以调用同一校验器，或使用当前 Codex 客户端提供的插件校验入口。
+The Codex package uses the validator supplied by Codex `plugin-creator`. CI can call the same validator or the plugin validation entry point provided by the installed Codex client.
