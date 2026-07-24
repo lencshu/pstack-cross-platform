@@ -1,6 +1,6 @@
 # pstack for Claude Code
 
-Generated from the Cursor pstack source at version `0.11.8-1`.
+Generated from the Cursor pstack source at version `0.11.8-2`.
 Do not edit this directory directly; change `adapters/claude.json` or an
 override and run `python scripts/build_adapters.py` from the repository root.
 
