@@ -100,7 +100,16 @@ def transform_text(text: str, config: dict[str, Any]) -> str:
         )
         # Codex plugin ingestion currently requires plugin-bundled skills to remain
         # model-invocable even when the Cursor source marks a slash-only workflow.
-        text = text.replace("disable-model-invocation: true", "disable-model-invocation: false")
+        # Match only a real frontmatter line (bare key: value, nothing else on the
+        # line) so prose that quotes the key inline — e.g. automate-me instructing
+        # agents what to write into a *newly generated* skill's frontmatter — is
+        # left untouched instead of being flipped into self-contradictory guidance.
+        text = re.sub(
+            r"^disable-model-invocation: true$",
+            "disable-model-invocation: false",
+            text,
+            flags=re.MULTILINE,
+        )
         text = text.replace(
             "different model family from the parent's",
             "different available model or reasoning profile from the parent's",
