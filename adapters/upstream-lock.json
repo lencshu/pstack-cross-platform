@@ -2,5 +2,7 @@
   "repository": "https://github.com/cursor/plugins.git",
   "ref": "main",
   "subdirectory": "pstack",
-  "commit": "3fe2823ce17c1656c222d4b7c59d3f82fbf20143"
+  "commit": "04166ac89136d36de2a87f24429e6cc307594953",
+  "upstreamVersion": "0.11.8",
+  "forkRevision": 1
 }
