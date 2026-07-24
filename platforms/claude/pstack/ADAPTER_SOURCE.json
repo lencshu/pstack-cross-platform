@@ -4,7 +4,7 @@
   "platform": "claude",
   "source": "Cursor pstack tree at repository root",
   "sourceVersion": "0.11.8-2",
-  "sourceDigest": "7a54acb14565f1a1f3ff8f1caf687ee3ab4c1bf44c3d56b24a25bd81ecffeb7c",
+  "sourceDigest": "86005efc842d4399f3d42712359eeb009bf07081735a20b39b7a8d2b69a06aec",
   "upstreamRepository": "https://github.com/cursor/plugins.git",
   "upstreamCommit": "04166ac89136d36de2a87f24429e6cc307594953"
 }
