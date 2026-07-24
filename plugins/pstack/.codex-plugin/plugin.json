@@ -1,9 +1,9 @@
 {
   "name": "pstack",
-  "version": "0.11.3",
+  "version": "0.11.8-1",
   "description": "if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence.",
   "author": {
-    "name": "Lauren Tan"
+    "name": "Lauren Tan - Sylvain"
   },
   "homepage": "https://github.com/lencshu/pstack-cross-platform#readme",
   "repository": "https://github.com/lencshu/pstack-cross-platform",
@@ -23,7 +23,7 @@
     "displayName": "pstack",
     "shortDescription": "Rigorous, verifiable engineering workflows for Codex",
     "longDescription": "A generated Codex edition of pstack with platform-aware subagent, model, skill-path, and monitoring instructions.",
-    "developerName": "Lauren Tan",
+    "developerName": "Lauren Tan - Sylvain",
     "category": "Developer Tools",
     "capabilities": [
       "Skills",

@@ -25,7 +25,7 @@ Resolve what is in scope vs explicitly out, technical or platform constraints, p
 Delegate codebase exploration (the **guard-the-context-window** principle skill).
 
 - Prefer a worker subagent explicitly instructed to read `$pstack:poteto-mode` before acting. `default` is the fallback. Never use the built-in `plan` agent role; it ignores this skill.
-- Pass `model:` explicitly per the configured roles (defaults `gpt-5.6-terra (medium)` for code, `gpt-5.6-sol (high)` for judgment).
+- Pass `model:` explicitly per the configured roles (defaults `gpt-5.6-terra (medium)` for code, `gpt-5.6-sol (max)` for judgment).
 
 Each explorer returns file pointers, conventions, dependencies, test infrastructure, and entry points. No inlined dumps.
 

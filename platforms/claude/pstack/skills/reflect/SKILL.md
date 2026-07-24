@@ -42,7 +42,7 @@ One message, three parallel `Agent` calls, the built-in `general-purpose` agent,
 | Lens | `model` | Prompt template |
 |---|---|---|
 | Judgment | your configured reflect-judgment model (default `opus`) | `references/judgment-reviewer.md` |
-| Tooling | your configured reflect-tooling model (default `sonnet`) | `references/tooling-reviewer.md` |
+| Tooling | your configured reflect-tooling model (default `gpt-5.6-sol-max`) | `references/tooling-reviewer.md` |
 | Divergent | your configured reflect-judgment model (default `opus`) | `references/divergent-reviewer.md` |
 
 Pass each template verbatim, substituting the transcript path or digest where marked. Reviewers return findings in the `Agent` response body.

@@ -166,7 +166,7 @@ If your scope assessment suggests a single-commit trivial target where the PR de
 Spawn one synthesizer subagent:
 
 - agent role: the built-in default subagent
-- `model`: your configured why-synthesizer model (default `gpt-5.6-sol (high)`)
+- `model`: your configured why-synthesizer model (default `gpt-5.6-sol (max)`)
 - posture: normal inherited tools with an explicit no-write instruction. The synthesizer's quality check spot-verifies citations, which can require MCP access. a restrictive sandbox may remove required connector access and defeat that.
 
 The synthesizer gets:

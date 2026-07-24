@@ -41,15 +41,15 @@ One message, three parallel `spawn_agent` calls, the built-in default subagent, 
 
 | Lens | `model` | Prompt template |
 |---|---|---|
-| Judgment | your configured reflect-judgment model (default `gpt-5.6-sol (high)`) | `references/judgment-reviewer.md` |
-| Tooling | your configured reflect-tooling model (default `gpt-5.6-terra (medium)`) | `references/tooling-reviewer.md` |
-| Divergent | your configured reflect-judgment model (default `gpt-5.6-sol (high)`) | `references/divergent-reviewer.md` |
+| Judgment | your configured reflect-judgment model (default `gpt-5.6-sol (max)`) | `references/judgment-reviewer.md` |
+| Tooling | your configured reflect-tooling model (default `gpt-5.6-sol-max`) | `references/tooling-reviewer.md` |
+| Divergent | your configured reflect-judgment model (default `gpt-5.6-sol (max)`) | `references/divergent-reviewer.md` |
 
 Pass each template verbatim, substituting the transcript path or digest where marked. Reviewers return findings in the `spawn_agent` response body.
 
 ### 3. Synthesize
 
-One `spawn_agent` call, the built-in default subagent, using your configured reflect-judgment model (default `gpt-5.6-sol (high)`), normal inherited tool access. The synthesizer's quality check includes spot-verifying citations, which can require MCP access; a restrictive sandbox may remove required connector accesss. Use `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. The synthesizer returns a structured Accepted / Rejected / Backlog list.
+One `spawn_agent` call, the built-in default subagent, using your configured reflect-judgment model (default `gpt-5.6-sol (max)`), normal inherited tool access. The synthesizer's quality check includes spot-verifying citations, which can require MCP access; a restrictive sandbox may remove required connector accesss. Use `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. The synthesizer returns a structured Accepted / Rejected / Backlog list.
 
 ### 4. Structural enforcement check
 

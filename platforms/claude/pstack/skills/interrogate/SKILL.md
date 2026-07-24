@@ -36,14 +36,20 @@ Write one clear paragraph. Reviewers challenge whether the work achieves the int
 
 ## Step 3, Spawn Reviewers
 
-Launch one reviewer per model in your configured interrogate list (defaults `opus`, `sonnet`, `haiku`), all in a single message.
+Launch all reviewers in a single message using the Task tool. Use the `interrogate reviewers` list from `~/.pstack/claude-models.md` when present, one reviewer per entry, extending or shrinking the Reviewer A/B/C labels below to the configured entry count; otherwise use the table defaults.
+
+| Subagent | Default model |
+|----------|---------------|
+| Reviewer A | `opus` |
+| Reviewer B | `gpt-5.6-sol-max` |
+| Reviewer C | `sonnet` |
 
 For each reviewer:
 - agent type: `general-purpose`
-- `model`: one model from the configured interrogate list
+- `model`: the configured `interrogate reviewers` entry, or the table default with no configured line
 - posture: explicitly read-only in the subagent prompt; do not remove inherited tools
 
-If a configured model slug is rejected as unresolvable when you try to spawn the subagent, check the valid slugs in the current `Agent` tool metadata, pick the closest equivalent (prefer the highest-reasoning tier of the same family), spawn with the valid slug, and open a separate PR to update the configured defaults. Do not block the review on the slug issue.
+If a model slug is rejected as unresolvable when you try to spawn the subagent, check the valid slugs in the current `Agent` tool metadata, pick the closest equivalent (prefer the highest-reasoning tier of the same family), spawn with the valid slug, and open a separate PR to update the configured value or default table. Do not block the review on the slug issue. If the configured value is `inherit-parent` or `auto`, omit `model` instead; never treat those aliases as broken slugs or enter this fallback for them.
 
 Read `references/reviewer-prompt.md` and fill in the template with:
 1. The stated intent
@@ -91,7 +97,7 @@ Present the verdict in this structure:
 > [The stated intent paragraph from Step 2]
 
 ### Reviewers
-List each reviewer on its own line like `- <model name>: [N findings]`
+- Reviewer [label]: [model name], [N findings] (one bullet per reviewer)
 
 ### Act On
 [Findings that should be addressed. For each: description, which models raised it, why it matters.]

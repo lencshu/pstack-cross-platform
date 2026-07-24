@@ -3,8 +3,8 @@
   "generator": "scripts/build_adapters.py",
   "platform": "codex",
   "source": "Cursor pstack tree at repository root",
-  "sourceVersion": "0.11.3",
-  "sourceDigest": "1b0822494d1fc40a9d063877cda429bb6a5fd966a9de97f52570bb52c158a570",
+  "sourceVersion": "0.11.8-1",
+  "sourceDigest": "11d4101625e0e61293b54736f583e592b7c35b289b19c58fc81e6219a57ef766",
   "upstreamRepository": "https://github.com/cursor/plugins.git",
-  "upstreamCommit": "3fe2823ce17c1656c222d4b7c59d3f82fbf20143"
+  "upstreamCommit": "04166ac89136d36de2a87f24429e6cc307594953"
 }

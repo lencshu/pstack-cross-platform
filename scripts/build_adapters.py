@@ -81,6 +81,12 @@ def replace_invocations(text: str, config: dict[str, Any]) -> str:
 
 
 def transform_text(text: str, config: dict[str, Any]) -> str:
+    # Must run before the generic Cursor-name substitutions below: those blindly
+    # capitalize "cursor" to the platform name, which would otherwise turn this
+    # literal rule-file path into "~/.Codex/rules/..." (a forbidden_patterns hit)
+    # instead of the platform's own model-config file.
+    text = text.replace("~/.cursor/rules/pstack-models.mdc", config["config_path"])
+
     replacements: dict[str, str] = {}
     replacements.update(config["model_replacements"])
     replacements.update(config["text_replacements"])
