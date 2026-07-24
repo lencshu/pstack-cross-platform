@@ -308,6 +308,8 @@ python scripts/sync_cursor_upstream.py --apply
 
 `--apply` mirrors only `.cursor-plugin/`, `agents/`, `automations/`, `skills/`, `LICENSE`, and `README.md`. It does not overwrite `adapters/`, `scripts/`, tests, or generated marketplaces. It rebuilds the two target packages and records the upstream commit.
 
+Every `--apply` run also stamps `.cursor-plugin/plugin.json` with this fork's lineage: the upstream `version` gets a `-N` fork-revision suffix, and `author.name` becomes `<upstream author> - Sylvain`. `N` resets to `1` when the upstream version itself changed since the last `--apply`, and increments otherwise (e.g. running `--apply` again for an adapter-only fix with no upstream version bump). The prior state lives in `adapters/upstream-lock.json`'s `upstreamVersion`/`forkRevision` fields, which `build_adapters.py` then reads through `.cursor-plugin/plugin.json`'s `version`/`author` into both generated manifests and marketplace files.
+
 When upstream introduces a stable platform-coupled expression, add the rule to `adapters/<platform>.json` first. Put an override in `overrides/` only when a single file cannot be translated reliably. This keeps later sync conflicts in the adapter layer instead of spreading them through the skills.
 
 ## Build and verification

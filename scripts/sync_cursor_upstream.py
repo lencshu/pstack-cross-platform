@@ -31,6 +31,13 @@ TEXT_SUFFIXES = {".md", ".json", ".yaml", ".yml", ".sh", ".tsv", ".txt"}
 README_START = "<!-- pstack-cross-platform:install:start -->"
 README_END = "<!-- pstack-cross-platform:install:end -->"
 
+# This fork republishes Cursor's upstream pstack as Codex and Claude Code
+# packages. `stamp_fork_identity` marks that lineage on every --apply: the
+# upstream semver gets a "-N" fork-revision suffix (reset to 1 whenever the
+# upstream version itself changes, incremented otherwise), and the upstream
+# author is credited alongside the fork maintainer.
+FORK_MAINTAINER = "Sylvain"
+
 
 def run(*args: str, cwd: Path | None = None) -> str:
     completed = subprocess.run(
@@ -88,6 +95,55 @@ def diff(local: Path, upstream: Path) -> list[tuple[str, str]]:
     return changes
 
 
+def load_json(path: Path) -> dict:
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def stamp_fork_identity(
+    root: Path, previous_upstream_version: str | None, previous_fork_revision: int
+) -> tuple[str, int]:
+    """Rewrite .cursor-plugin/plugin.json's version and author with fork lineage.
+
+    Idempotent: safe to call whether plugin.json currently holds a bare
+    upstream version (freshly mirrored) or an already-stamped one (the
+    no-diff --apply path, where mirror() never ran this cycle).
+    """
+    plugin_path = root / ".cursor-plugin" / "plugin.json"
+    text = plugin_path.read_text(encoding="utf-8")
+
+    version_match = re.search(r'"version":\s*"([^"]+)"', text)
+    if not version_match:
+        raise ValueError("plugin.json is missing a version field")
+    raw_version = version_match.group(1)
+    upstream_version = re.sub(r"-\d+$", "", raw_version)
+
+    if previous_upstream_version == upstream_version:
+        fork_revision = previous_fork_revision + 1
+    else:
+        fork_revision = 1
+
+    text = text.replace(
+        f'"version": "{raw_version}"',
+        f'"version": "{upstream_version}-{fork_revision}"',
+        1,
+    )
+
+    author_pattern = re.compile(r'("author":\s*\{\s*\n\s*"name":\s*")([^"]+)(")')
+    author_match = author_pattern.search(text)
+    if not author_match:
+        raise ValueError("plugin.json is missing an author.name field")
+    upstream_author = re.sub(rf" - {re.escape(FORK_MAINTAINER)}$", "", author_match.group(2))
+    text = author_pattern.sub(
+        lambda m: f"{m.group(1)}{upstream_author} - {FORK_MAINTAINER}{m.group(3)}",
+        text,
+        count=1,
+    )
+
+    plugin_path.write_text(text, encoding="utf-8")
+    return upstream_version, fork_revision
+
+
 def mirror(upstream: Path) -> None:
     root_resolved = ROOT.resolve()
     for relative in UPSTREAM_PATHS:
@@ -118,6 +174,9 @@ def main() -> int:
     parser.add_argument("--subdir", default="pstack")
     args = parser.parse_args()
 
+    lock_path = ROOT / "adapters" / "upstream-lock.json"
+    previous_lock = load_json(lock_path) if lock_path.exists() else {}
+
     with tempfile.TemporaryDirectory(prefix="pstack-upstream-") as temporary:
         checkout = Path(temporary) / "cursor-plugins"
         run(
@@ -140,45 +199,38 @@ def main() -> int:
         changes = diff(ROOT, upstream)
 
         if not changes:
-            if args.apply:
-                lock = {
-                    "repository": args.repo,
-                    "ref": args.ref,
-                    "subdirectory": args.subdir,
-                    "commit": commit,
-                }
-                lock_path = ROOT / "adapters" / "upstream-lock.json"
-                lock_path.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
-                subprocess.run(
-                    [sys.executable, str(ROOT / "scripts" / "update_readme.py")], check=True
-                )
-                subprocess.run(
-                    [sys.executable, str(ROOT / "scripts" / "build_adapters.py")], check=True
-                )
-                print(f"Cursor source is current at {commit}; rebuilt both adapters.")
-            else:
-                print(f"Cursor source is current at {commit}.")
-            return 0
+            print(f"Cursor source is current at {commit}.")
+            if not args.apply:
+                return 0
+        else:
+            print(f"Cursor source differs from {args.repo}@{commit}:")
+            for operation, path in changes:
+                print(f"  {operation:6} {path}")
+            if not args.apply:
+                print("No files changed. Re-run with --apply to sync and rebuild adapters.")
+                return 1
+            mirror(upstream)
 
-        print(f"Cursor source differs from {args.repo}@{commit}:")
-        for operation, path in changes:
-            print(f"  {operation:6} {path}")
-        if not args.apply:
-            print("No files changed. Re-run with --apply to sync and rebuild adapters.")
-            return 1
-
-        mirror(upstream)
+        upstream_version, fork_revision = stamp_fork_identity(
+            ROOT,
+            previous_lock.get("upstreamVersion"),
+            previous_lock.get("forkRevision", 0),
+        )
         subprocess.run([sys.executable, str(ROOT / "scripts" / "update_readme.py")], check=True)
         lock = {
             "repository": args.repo,
             "ref": args.ref,
             "subdirectory": args.subdir,
             "commit": commit,
+            "upstreamVersion": upstream_version,
+            "forkRevision": fork_revision,
         }
-        lock_path = ROOT / "adapters" / "upstream-lock.json"
         lock_path.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
         subprocess.run([sys.executable, str(ROOT / "scripts" / "build_adapters.py")], check=True)
-        print(f"Synced Cursor source to {commit} and rebuilt both adapters.")
+        print(
+            f"Synced Cursor source to {commit} "
+            f"(pstack {upstream_version}-{fork_revision})."
+        )
     return 0
 
 

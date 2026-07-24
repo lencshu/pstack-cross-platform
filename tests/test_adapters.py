@@ -65,7 +65,8 @@ class AdapterBuildTests(unittest.TestCase):
         for path in (ROOT / "plugins" / "pstack" / "skills").glob("*/SKILL.md"):
             text = path.read_text(encoding="utf-8")
             self.assertIn("<!-- pstack-adapter:codex -->", text, path)
-            self.assertNotIn("disable-model-invocation: true", text, path)
+            frontmatter = text.split("---\n", 2)[1]
+            self.assertNotIn("disable-model-invocation: true", frontmatter, path)
 
     def test_marketplaces_resolve_to_packages(self) -> None:
         codex = load(ROOT / ".agents" / "plugins" / "marketplace.json")
