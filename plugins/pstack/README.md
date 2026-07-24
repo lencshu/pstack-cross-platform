@@ -1,6 +1,6 @@
 # pstack for Codex
 
-Generated from the Cursor pstack source at version `0.11.8-2`.
+Generated from the Cursor pstack source at version `0.11.8-3`.
 Do not edit this directory directly; change `adapters/codex.json` or an
 override and run `python scripts/build_adapters.py` from the repository root.
 
