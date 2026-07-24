@@ -4,7 +4,7 @@
   "platform": "codex",
   "source": "Cursor pstack tree at repository root",
   "sourceVersion": "0.11.8-2",
-  "sourceDigest": "07917bc578ceb632372e36de2f8893a47b37415c698116c181942512d869c801",
+  "sourceDigest": "fecec7cfbb8d931fdbaa4c7a7f4c079e8bd32c3de410368f7bc4c42afb710410",
   "upstreamRepository": "https://github.com/cursor/plugins.git",
   "upstreamCommit": "04166ac89136d36de2a87f24429e6cc307594953"
 }

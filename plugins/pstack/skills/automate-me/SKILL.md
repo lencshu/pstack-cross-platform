@@ -74,7 +74,7 @@ Use Codex's built-in `$skill-creator` skill to author the skill. Placement:
 - Frontmatter `description`: trigger on their name + `/<handle>-mode` + "work in their style", not on generic keywords like "write code" or "review PR".
 - Frontmatter formatting: follow `skill-creator`'s YAML rules. Keep `description` as one YAML scalar; quote it or use `description: >-` with indented continuation lines when punctuation or wrapping requires it.
 - Frontmatter `disable-model-invocation: true` by default. Mode skills are heavy and opinionated; they should only apply when the user explicitly invokes them (by name or slash command), not auto-trigger on description matching. Opt out only if the user explicitly wants their mode to apply on every turn.
-- Poteto-mode baseline: if the user works in pstack's **poteto-mode** style, open the drafted skill's body with an instruction to read poteto-mode's `SKILL.md` in full via the Read tool before applying anything below — the same convention `agents/poteto-agent.md` uses to prime a poteto subagent. Read, not `Skill`: poteto-mode itself sets `disable-model-invocation: true`, so a personal skill pulls in its principles by reading the file directly rather than calling it as a tool. Personal preferences then layer on top; write a section here only where the user's habits diverge from or add specificity to poteto-mode, not where they'd just restate it. Skip this bullet entirely if the user doesn't use poteto-mode.
+- Poteto-mode baseline: if the user works in pstack's **poteto-mode** style, open the drafted skill's body with an instruction to read poteto-mode's `SKILL.md` in full before applying anything below — the same technique used elsewhere in pstack to prime a worker subagent with poteto-mode's rules without a skill-invocation tool call. poteto-mode itself sets `disable-model-invocation: true`, so a personal skill pulls in its principles by reading the file directly rather than invoking it. Personal preferences then layer on top; write a section here only where the user's habits diverge from or add specificity to poteto-mode, not where they'd just restate it. Skip this bullet entirely if the user doesn't use poteto-mode.
 
 ### 5. Iterate on prose
 
@@ -109,6 +109,6 @@ Run a description-optimization loop only if the skill's trigger accuracy turns o
 ## Reference files
 
 - The **poteto-mode** skill: example of the output shape.
-- `agents/poteto-agent.md`: example of priming via a direct `SKILL.md` read instead of the `Skill` tool.
+- The worker-subagent pattern used elsewhere in pstack: example of priming via a direct `SKILL.md` read instead of a skill-invocation tool call.
 - The **unslop** skill: prose discipline for every line.
 - Codex's built-in `$skill-creator` skill: skill authoring process and writing guidelines.
